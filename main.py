@@ -47,10 +47,21 @@ def parseDate(date):
     data["date"] = date[0]
     data["time"] = date[1].split(":")
     return data
-BASEURL = input('input gallery URL like "http://gall.dcinside.com/board/lists/?id=cat": ')
+BASEURL = input('input gallery URL or GALLERY NAME : ')
+if(not "dcinside" in BASEURL):
+    try:
+        BASEURL = BeautifulSoup(requests.get("http://search.dcinside.com/gallery/q/"+BASEURL).text, "html.parser").select("#container > div > section.center_content > div.inner > div.integrate_cont.gallsch_result > ul > li > a")[0].get("href")
+    except:
+        try:
+            BASEURL = BeautifulSoup(requests.get("http://search.dcinside.com/gallery/q/" + BASEURL).text, "html.parser").select("#container > div > section.center_content > div.inner > div.integrate_cont.mgallsch_result > ul > li > a")[0].get("href")
+            BASEURL = "http://gall.dcinside.com/mgallery/board/lists"+BASEURL[BASEURL.find("?id="):]
+        except:
+            print("갤러리명을 정확하게 입력하여 주세요.")
+            exit(0)
+    print("URL : "+BASEURL)
 while True:
     print("NOW PAGE : ",i)
-    recommendPage = BeautifulSoup(requests.get(BASEURL + "&page=" + str(i) + "&exception_mode=recommend").text,"html.parser")
+    recommendPage = BeautifulSoup(requests.get(BASEURL+ "&page=" + str(i) + "&exception_mode=recommend").text,"html.parser")
     for j in recommendPage.select('#container > section.left_content > article > div.gall_listwrap.list > table > tbody > tr'):
         if(j.select("td.gall_num")[0].text != "공지"):
             recommend = j.select("td.gall_recommend")[0].text
