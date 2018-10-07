@@ -31,7 +31,7 @@ def serchData(date,time):
         averageRecommends = 0
     else:
         averageRecommends=averageRecommends//cnt
-    return str(cnt)+"/"+str(averageRecommends)
+    return cnt,averageRecommends
 
 def printData(str):
     print("%12s" % str, end="")
@@ -59,6 +59,8 @@ if(not "dcinside" in BASEURL):
             print("갤러리명을 정확하게 입력하여 주세요.")
             exit(0)
     print("URL : "+BASEURL)
+
+GALLERY_NAME = BeautifulSoup(requests.get(BASEURL).text,"html.parser").select("#container > section.left_content > header > div > div.fl.clear > h2 > a")[0].text
 while True:
     print("NOW PAGE : ",i)
     recommendPage = BeautifulSoup(requests.get(BASEURL+ "&page=" + str(i) + "&exception_mode=recommend").text,"html.parser")
@@ -82,19 +84,29 @@ while True:
 
 datas.reverse()
 previous_date = "000000000000000000000000000"
-printData("")
-dates = []
+print(GALLERY_NAME+"의 개념글 검사 결과")
+printData("시간/날짜")
+dates = [[],[],[]]
 for i in datas:
     if(previous_date != i["date"]):
         previous_date = i["date"]
-        dates.append(previous_date)
+        dates[0].append(previous_date)
+        dates[1].append(0)
+        dates[2].append(0)
         printData(previous_date)
 print()
 for i in range(0,25):
     printData(i)
-    for j in dates:
+    for j in range(0,dates[0].__len__()):
         time = str(i)
         if time.__len__() is 1:
             time = "0"+time
-        printData(serchData(j,time))
+        POSTS,AVR = serchData(dates[0][j], time)
+        printData(str(POSTS)+"/"+str(AVR))
+        dates[1][j]+=POSTS
+        dates[2][j] += AVR
     print()
+
+printData("")
+for j in range(0,dates[0].__len__()):
+    printData(str(dates[1][j])+"/"+str(dates[2][j]))
